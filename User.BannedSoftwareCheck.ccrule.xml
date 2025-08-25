@@ -1,0 +1,79 @@
+<rules>
+    <![CDATA[
+
+data_requirement_rule User.BannedSoftwareCheck (
+    @Entity=OperatingSystem.Windows.WindowsHost,
+    @DisplayName=@Entity.Hostname
+)
+
+params (
+    @Telegram string,
+    @uTorrent string,
+    @TeamViewer string,
+    @AnyDesk string,
+    @Amigo string,
+    @AIMP string,
+    @Kaspersky string,
+    @Java string,
+    @Adobe_Flash string,
+    @WinRAR string,
+    @SevenZip string,
+    @Google_Chrome string,
+    @Mail_Ru string,
+    @Yandex string,
+    @VLC string,
+    @Skype string,
+    @Zoom string
+)
+
+computability {
+    return @Entity.Softs.Any();
+}
+
+check DetectBannedSoftware()
+{
+    assert (
+        @BannedSoftwareCount == 0
+    )
+
+    checkData
+    {
+        var @bannedSoftware = @Entity.Softs.Where(@soft => 
+            @soft.Name.Contains(@Telegram) ||
+            @soft.Name.Contains(@uTorrent) ||
+            @soft.Name.Contains(@TeamViewer) ||
+            @soft.Name.Contains(@AnyDesk) ||
+            @soft.Name.Contains(@Amigo) ||
+            @soft.Name.Contains(@AIMP) ||
+            @soft.Name.Contains(@Kaspersky) ||
+            @soft.Name.Contains(@Java) ||
+            @soft.Name.Contains(@Adobe_Flash) ||
+            @soft.Name.Contains(@WinRAR) ||
+            @soft.Name.Contains(@SevenZip) ||
+            @soft.Name.Contains(@Google_Chrome) ||
+            @soft.Name.Contains(@Mail_Ru) ||
+            @soft.Name.Contains(@Yandex) ||
+            @soft.Name.Contains(@VLC) ||
+            @soft.Name.Contains(@Skype) ||
+            @soft.Name.Contains(@Zoom)
+        );
+
+        var @bannedDetails = @bannedSoftware.Select(@soft => dynamic{
+            SoftwareName = @soft.Name,
+            SoftwareVersion = @soft.Version,
+            SoftwareVendor = @soft.Vendor,
+            InstallPath = @soft.InstallPath,
+            BannedSoftwareCount = @bannedSoftware.Count()
+        });
+
+        filterByParameters(@bannedDetails);
+        
+        if (@bannedSoftware.Any())
+            return FAIL_NON_COMPLIANT;
+
+        return SUCCESS;
+    }
+}
+
+]]>
+</rules>
